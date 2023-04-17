@@ -15,6 +15,7 @@ typedef enum {
 
 typedef struct __attribute__((packed)) {
     unsigned long src_id;
+    unsigned long dest_id;
     unsigned long timestamp; // timestamp and seq are used for debugging
     unsigned long seq;
     Role role;
@@ -29,5 +30,7 @@ typedef struct __attribute__((packed)) {
 #define DISCONNECT_PERIOD 30
 #define SAMPLING_RATE 30
 #define EMPTY_ID (-1)
+
+#define MAX_RECEIVERS 3
 
 #endif //NBR_CONST_H

@@ -22,6 +22,18 @@
 // For neighbour discovery, we would like to send message to everyone. We use Broadcast address:
 linkaddr_t dest_addr;
 
+typedef enum {
+    NOT_CONNECTED,
+    CONNECTING,
+    CONNECTED
+} Status;
+
+typedef struct {
+    unsigned long src_id;
+    unsigned long last_within_proximity_s;
+    unsigned long first_detected;
+    Status stat;
+} node_info;
 /*---------------------------------------------------------------------------*/
 // duty cycle = WAKE_TIME / (WAKE_TIME + SLEEP_SLOT * SLEEP_CYCLE)
 /*---------------------------------------------------------------------------*/
@@ -39,8 +51,8 @@ static data_packet_struct data_packet;
 unsigned long curr_timestamp;
 unsigned long last_within_proximity_s;
 
-// the sender transmitter, this is based on the assumption that only a sender and receiver should detect each other
-// it means a sender with multiple receivers are not supported and vice versa
+// there can only be 1 sender and multiple receivers
+static node_info node_information[MAX_RECEIVERS];
 long receiver_id = EMPTY_ID;
 
 // light reading data
@@ -53,6 +65,9 @@ PROCESS(try_connecting_process, "15s connection");
 PROCESS(sending_light_process, "requesting light");
 
 AUTOSTART_PROCESSES(&detect_process);
+
+// function prototypes
+void handle_connecting_packet(data_packet_struct *received_packet_data);
 
 static uint8_t is_init = 1;
 
@@ -85,9 +100,16 @@ void receive_disco_callback(const void *data, uint16_t len, const linkaddr_t *sr
         memcpy(&received_packet_data, data, len);
 
         signed short rssi = (signed short) packetbuf_attr(PACKETBUF_ATTR_RSSI);
+        curr_timestamp = clock_time();
         if (received_packet_data.role == LIGHT_SENSOR_REQUESTER && rssi >= RSSI_THRESHOLD) {
-            // if it detects the id for the first time
-            receiver_id = (long) received_packet_data.src_id;
+            // if it detects the any id for the first time
+            node_information[0].src_id = received_packet_data.src_id;
+
+            unsigned long time_s = curr_timestamp / CLOCK_SECOND;
+            node_information[0].first_detected = time_s;
+            node_information[0].last_within_proximity_s = time_s;
+            node_information[0].stat = CONNECTING;
+
             etimer_stop(&et);
             process_start(&try_connecting_process, NULL);
             process_exit(&detect_process);
@@ -106,22 +128,50 @@ void receive_connecting_callback(const void *data, uint16_t len, const linkaddr_
         // Copy the content of packet into the data structure
         memcpy(&received_packet_data, data, len);
 
-        if (received_packet_data.src_id != receiver_id || received_packet_data.type != CONNECTING_PACKET) {
+        if (received_packet_data.type != CONNECTING_PACKET) {
             return; // ignore random packet
         }
 
-        static signed short current_rssi_value = 0;
-        current_rssi_value = (signed short) packetbuf_attr(PACKETBUF_ATTR_RSSI);
-        if (current_rssi_value < RSSI_THRESHOLD) {
-            etimer_stop(&tc_etimer);
+        handle_connecting_packet(&received_packet_data);
+    }
+}
 
-            NETSTACK_RADIO.off();
-            receiver_id = EMPTY_ID;
-            process_start(&detect_process, NULL);
-            process_exit(&try_connecting_process);
-        } else {
-            curr_timestamp = clock_time();
-            last_within_proximity_s = curr_timestamp / CLOCK_SECOND;
+void handle_connecting_packet(data_packet_struct *received_packet_data) {
+    static signed short current_rssi_value = 0;
+    static int i = 0;
+    current_rssi_value = (signed short) packetbuf_attr(PACKETBUF_ATTR_RSSI);
+
+    uint8_t is_found = false;
+    curr_timestamp = clock_time();
+    unsigned long time_s = curr_timestamp / CLOCK_SECOND;
+    for (i = 0; i < MAX_RECEIVERS; i++) {
+        if (node_information[i].src_id == (*received_packet_data).src_id) {
+            is_found = true;
+            if (current_rssi_value < RSSI_THRESHOLD) {
+                // not within proximity
+                switch (node_information[i].stat) {
+                    case CONNECTING:
+                        node_information[i].src_id = EMPTY_ID; // immediately ignore it
+                        node_information[i].stat = NOT_CONNECTED;
+                        break;
+                    case CONNECTED:
+                    case NOT_CONNECTED: // do nothing if its connected
+                        break;
+                }
+            } else {
+                node_information[i].last_within_proximity_s = time_s;
+            }
+        }
+    }
+
+    if (!is_found && current_rssi_value >= RSSI_THRESHOLD) {
+        for (i = 0; i < MAX_RECEIVERS; i++) {
+            if (node_information[i].src_id == EMPTY_ID) {
+                node_information[i].src_id = EMPTY_ID;
+                node_information[i].first_detected = time_s;
+                node_information[i].last_within_proximity_s = time_s;
+                break;
+            }
         }
     }
 }
@@ -133,15 +183,11 @@ void receive_light_callback(const void *data, uint16_t len, const linkaddr_t *sr
         // Copy the content of packet into the data structure
         memcpy(&received_packet_data, data, len);
 
-        if (received_packet_data.src_id != receiver_id) {
-            return; // ignore random packet
-        }
-
-        static signed short current_rssi_value = 0;
         switch (received_packet_data.type) {
             case LIGHT_SENSOR_PACKET:
                 // read the light sensors and print them
                 data_packet.type = LIGHT_SENSOR_PACKET;
+                data_packet.dest_id = received_packet_data.src_id;
                 memcpy(data_packet.data, light_reading_data, sizeof(light_reading_data));
                 curr_timestamp = clock_time();
                 data_packet.timestamp = curr_timestamp;
@@ -149,20 +195,19 @@ void receive_light_callback(const void *data, uint16_t len, const linkaddr_t *sr
                 NETSTACK_NETWORK.output(&dest_addr);
                 break;
             case CONNECTING_PACKET:
-                current_rssi_value = (signed short) packetbuf_attr(PACKETBUF_ATTR_RSSI);
-                if (current_rssi_value >= RSSI_THRESHOLD) { // still within proximity
-                    curr_timestamp = clock_time();
-                    last_within_proximity_s = curr_timestamp / CLOCK_SECOND;
-                }
+                handle_connecting_packet(&received_packet_data);
                 break;
         }
     }
 }
 
+// at least 1 is connected
 PROCESS_THREAD(sending_light_process, ev, data) {
     PROCESS_BEGIN();
     NETSTACK_RADIO.on();
     nullnet_set_input_callback(receive_light_callback);
+    static int j = 0;
+
     while (1) {
         data_packet.type = CONNECTING_PACKET;
         curr_timestamp = clock_time();
@@ -171,34 +216,73 @@ PROCESS_THREAD(sending_light_process, ev, data) {
         NETSTACK_NETWORK.output(&dest_addr);
         etimer_set(&light_etimer, CLOCK_SECOND * CONNECT_INTERVAL);
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&light_etimer));
+
+        // check the status for every neighbours possible
+        bool is_all_empty = true;
+        bool at_least_one_is_connecting = false;
+        bool at_least_one_is_connected = false;
         curr_timestamp = clock_time();
-        if ((curr_timestamp / CLOCK_SECOND) - last_within_proximity_s >= DISCONNECT_PERIOD) {
-            curr_timestamp = clock_time();
-            printf("%lu ABSENT %ld", curr_timestamp / CLOCK_SECOND, receiver_id);
-            goto quit;
+        for (j = 0; j < MAX_RECEIVERS; j++) {
+            if (node_information[j].src_id != EMPTY_ID) {
+                bool should_be_connected = (curr_timestamp / CLOCK_SECOND - node_information[j].first_detected) >= CONNECT_PERIOD;
+                switch (node_information[j].stat) {
+                    case CONNECTED:
+                        if (curr_timestamp / CLOCK_SECOND - node_information[j].last_within_proximity_s >= DISCONNECT_PERIOD) {
+                            printf("%lu ABSENT %ld", node_information[j].last_within_proximity_s, node_information[j].src_id);
+                            node_information[j].src_id = EMPTY_ID;
+                            node_information[j].stat = NOT_CONNECTED;
+                        } else {
+                            is_all_empty = false;
+                            at_least_one_is_connected = true;
+                        }
+                        break;
+                    case CONNECTING:
+                        is_all_empty = false;
+                        if (should_be_connected) {
+                            printf("%lu DETECT %ld", curr_timestamp / CLOCK_SECOND, node_information[j].first_detected);
+                            at_least_one_is_connected = true;
+                            node_information[j].stat = CONNECTED;
+                        } else {
+                            at_least_one_is_connecting = true;
+                        }
+                        break;
+                    case NOT_CONNECTED:
+                        break;
+                }
+            }
+        }
+
+        if (at_least_one_is_connected) {
+          // do nothing
+        } else if (is_all_empty) {
+            etimer_stop(&light_etimer);
+
+            NETSTACK_RADIO.off();
+            process_start(&detect_process, NULL);
+            process_exit(&sending_light_process);
+        } else if (at_least_one_is_connecting) {
+            // go back to try connecting process
+            etimer_stop(&light_etimer);
+            NETSTACK_RADIO.off();
+            process_start(&try_connecting_process, NULL);
+            process_exit(&sending_light_process);
         }
     }
 
-quit:
-    etimer_stop(&light_etimer);
-    process_start(&detect_process, NULL);
-    receiver_id = EMPTY_ID;
-    NETSTACK_RADIO.off();
-    process_exit(&sending_light_process);
     PROCESS_END();
 }
 
+// as long as there is >= 1 process attempt to connect, we will be in this state
 PROCESS_THREAD(try_connecting_process, ev, data) {
     PROCESS_BEGIN();
     NETSTACK_RADIO.on();
     data_packet.type = CONNECTING_PACKET;
 
-    printf("Try connecting with id %ld\n", receiver_id);
     nullnet_set_input_callback(receive_connecting_callback);
 
     static int j;
 
-    for (j = 0; j < CONNECT_PERIOD / CONNECT_INTERVAL; j++) {
+    while(1) {
         data_packet.seq++;
         curr_timestamp = clock_time();
         data_packet.timestamp = curr_timestamp;
@@ -209,12 +293,36 @@ PROCESS_THREAD(try_connecting_process, ev, data) {
 
         etimer_set(&tc_etimer, CLOCK_SECOND * CONNECT_INTERVAL);
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&tc_etimer));
+
+        // check the status for every neighbours possible
+        bool is_all_empty = true;
+        bool at_least_one_is_connected = false;
+        curr_timestamp = clock_time();
+        for (j = 0; j < MAX_RECEIVERS; j++) {
+            if (node_information[j].src_id != EMPTY_ID) {
+                is_all_empty = false;
+                if (curr_timestamp / CLOCK_SECOND - node_information[j].first_detected >= CONNECT_PERIOD) {
+                    printf("%lu DETECT %ld", curr_timestamp / CLOCK_SECOND, node_information[j].first_detected);
+                    at_least_one_is_connected = true;
+                    node_information[j].stat = CONNECTED;
+                }
+            }
+        }
+
+        if (is_all_empty) {
+            etimer_stop(&tc_etimer);
+
+            NETSTACK_RADIO.off();
+            process_start(&detect_process, NULL);
+            process_exit(&try_connecting_process);
+        }
+
+        if (at_least_one_is_connected) {
+            process_start(&sending_light_process, NULL);
+            process_exit(&try_connecting_process);
+        }
     }
 
-    curr_timestamp = clock_time();
-    printf("%lu DETECT %ld", curr_timestamp / CLOCK_SECOND, receiver_id);
-    process_start(&sending_light_process, NULL);
-    process_exit(&try_connecting_process);
     PROCESS_END();
 }
 
@@ -237,6 +345,11 @@ PROCESS_THREAD(detect_process, ev, data) {
 
         for (i = 0; i < 10; i++) {
             light_reading_data[i] = 0;
+        }
+
+        for (i = 0; i < MAX_RECEIVERS; i++) {
+            node_information[i].src_id = EMPTY_ID;
+            node_information[i].stat = NOT_CONNECTED;
         }
 
         is_init = 0;

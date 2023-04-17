@@ -37,8 +37,7 @@ static data_packet_struct data_packet;
 unsigned long curr_timestamp;
 unsigned long last_within_proximity_s;
 
-// the sender transmitter, this is based on the assumption that only a sender and receiver should detect each other
-// it means a sender with multiple receivers are not supported and vice versa
+// there can only be 1 transmitter with multiple receiver
 long transmitter_id = EMPTY_ID;
 
 // Starts the main contiki neighbour discovery process
@@ -113,6 +112,10 @@ void receive_light_callback(const void *data, uint16_t len, const linkaddr_t *sr
         static signed short current_rssi_value = 0;
         switch (received_packet_data.type) {
             case LIGHT_SENSOR_PACKET:
+                if (received_packet_data.dest_id != node_id) {
+                    return; // not for us
+                }
+
                 // read the light sensors and print them
                 printf("Light: ");
                 for (int i = 0; i < 10; i++) {
