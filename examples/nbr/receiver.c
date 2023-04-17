@@ -181,7 +181,6 @@ quit:
 PROCESS_THREAD(try_connecting_process, ev, data) {
     PROCESS_BEGIN();
     NETSTACK_RADIO.on();
-    data_packet.type = CONNECTING_PACKET;
 
     printf("Try connecting with id %ld\n", transmitter_id);
     nullnet_set_input_callback(receive_connecting_callback);
@@ -192,6 +191,7 @@ PROCESS_THREAD(try_connecting_process, ev, data) {
         data_packet.seq++;
         curr_timestamp = clock_time();
         data_packet.timestamp = curr_timestamp;
+        data_packet.type = CONNECTING_PACKET;
 
         printf("Send seq# %lu  @ %8lu ticks   %3lu.%03lu\n", data_packet.seq, curr_timestamp,
                curr_timestamp / CLOCK_SECOND, ((curr_timestamp % CLOCK_SECOND) * 1000) / CLOCK_SECOND);
@@ -217,7 +217,6 @@ PROCESS_THREAD(detect_process, ev, data) {
         data_packet.src_id = node_id; //Initialize the node ID
         data_packet.seq = 0; //Initialize the sequence number of the packet at the begin of disco
         data_packet.role = LIGHT_SENSOR_REQUESTER;
-        data_packet.type = CONNECTING_PACKET;
         linkaddr_copy(&dest_addr, &linkaddr_null);
         printf("Light sensor provider\n");
         is_init = 0;
@@ -249,6 +248,7 @@ PROCESS_THREAD(detect_process, ev, data) {
             data_packet.seq++;
             curr_timestamp = clock_time();
             data_packet.timestamp = curr_timestamp;
+            data_packet.type = CONNECTING_PACKET;
 
             printf("Send seq# %lu  @ %8lu ticks   %3lu.%03lu\n", data_packet.seq, curr_timestamp,
                    curr_timestamp / CLOCK_SECOND, ((curr_timestamp % CLOCK_SECOND) * 1000) / CLOCK_SECOND);
