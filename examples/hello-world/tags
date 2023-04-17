@@ -1,0 +1,36 @@
+!_TAG_FILE_SORTED	2	/0=unsorted, 1=sorted, 2=foldcase/
+Active	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/assignment2.c	/^    Active \/\/ either buzzing or wait$/;"	e	language:C++	enum:__anon1	file:
+assignment2	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/assignment2.c	/^AUTOSTART_PROCESSES(&assignment2);$/;"	v	language:C++
+blinks	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/hello-world.c	/^static uint8_t blinks;$/;"	v	language:C++	file:
+buzzer_counter	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/assignment2.c	/^static int buzzer_counter = 0;$/;"	v	language:C++	file:
+buzzer_duration	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/assignment2.c	/^static int buzzer_duration = 30;$/;"	v	language:C++	file:
+buzzer_freq	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/assignment2.c	/^static int buzzer_freq = 2093;$/;"	v	language:C++	file:
+check_active	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/assignment2.c	/^static void check_active() {$/;"	f	language:C++	file:
+check_active	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/assignment2.c	/^static void check_active(void);$/;"	p	language:C++	file:
+count	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/hello-world.c	/^static uint16_t count;$/;"	v	language:C++	file:
+current_state	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/assignment2.c	/^static State current_state = Idle;$/;"	v	language:C++	file:
+do_mpu_reading	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/assignment2.c	/^static void do_mpu_reading() {$/;"	f	language:C++	file:
+do_mpu_reading	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/assignment2.c	/^static void do_mpu_reading(void);$/;"	p	language:C++	file:
+do_rtimer_timeout	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/assignment2.c	/^void do_rtimer_timeout(struct rtimer *timer, void *ptr) {$/;"	f	language:C++
+do_rtimer_timeout	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/assignment2.c	/^void do_rtimer_timeout(struct rtimer*, void*);$/;"	p	language:C++	file:
+et_blink	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/hello-world.c	/^static struct etimer et_blink; $/;"	v	language:C++	typeref:struct:etimer	file:
+et_hello	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/hello-world.c	/^static struct etimer et_hello;$/;"	v	language:C++	typeref:struct:etimer	file:
+gyro_threshold	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/assignment2.c	/^static int gyro_threshold = 20000;$/;"	v	language:C++	file:
+Idle	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/assignment2.c	/^    Idle = 0,$/;"	e	language:C++	enum:__anon1	file:
+init	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/assignment2.c	/^static void init(void) {$/;"	f	language:C++	file:
+init	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/assignment2.c	/^static void init(void);$/;"	p	language:C++	file:
+init_opt_reading	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/assignment2.c	/^static void init_opt_reading(void) {$/;"	f	language:C++	file:
+init_opt_reading	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/assignment2.c	/^static void init_opt_reading(void);$/;"	p	language:C++	file:
+is_buzzer_playing	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/assignment2.c	/^static bool is_buzzer_playing = false;$/;"	v	language:C++	file:
+is_significant_motion	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/assignment2.c	/^bool is_significant_motion(int x_gyro, int y_gyro, int z_gyro, int x_acc, int y_acc, int z_acc) {$/;"	f	language:C++
+is_significant_motion	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/assignment2.c	/^static bool is_significant_motion(int, int, int, int, int, int);$/;"	p	language:C++	file:
+light_timeout_rtimer	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/assignment2.c	/^static rtimer_clock_t light_timeout_rtimer = RTIMER_SECOND \/ 2;$/;"	v	language:C++	file:
+lux_change_threshold	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/assignment2.c	/^static int lux_change_threshold = 300;$/;"	v	language:C++	file:
+motion_timeout_rtimer	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/assignment2.c	/^static rtimer_clock_t motion_timeout_rtimer = RTIMER_SECOND \/ 2;$/;"	v	language:C++	file:
+normal_room_light	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/assignment2.c	/^static int normal_room_light = 9000;$/;"	v	language:C++	file:
+prev_lux_value	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/assignment2.c	/^static int prev_lux_value = 0;$/;"	v	language:C++	file:
+PROCESS_THREAD	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/assignment2.c	/^PROCESS_THREAD(assignment2, ev, data) {$/;"	f	language:C++
+PROCESS_THREAD	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/hello-world.c	/^PROCESS_THREAD(blink_process, ev, data) {$/;"	f	language:C++
+PROCESS_THREAD	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/hello-world.c	/^PROCESS_THREAD(hello_world_process, ev, data)$/;"	f	language:C++
+State	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/assignment2.c	/^} State;$/;"	t	language:C++	typeref:enum:__anon1	file:
+timer_rtimer	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/hello-world/assignment2.c	/^static struct rtimer timer_rtimer;$/;"	v	language:C++	typeref:struct:rtimer	file:

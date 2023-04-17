@@ -1,0 +1,8 @@
+!_TAG_FILE_SORTED	2	/0=unsorted, 1=sorted, 2=foldcase/
+input_callback	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/unicast/unicast_communication.c	/^void input_callback(const void *data, uint16_t len,$/;"	f	language:C++
+LOG_LEVEL	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/unicast/unicast_communication.c	12;"	d	language:C++	file:
+LOG_MODULE	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/unicast/unicast_communication.c	11;"	d	language:C++	file:
+message_count	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/unicast/unicast_communication.c	/^static signed message_count = 0; $/;"	v	language:C++	file:
+PROCESS_THREAD	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/unicast/unicast_communication.c	/^PROCESS_THREAD(unicast_process, ev, data)$/;"	f	language:C++
+total	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/unicast/unicast_communication.c	/^static signed total = 0; $/;"	v	language:C++	file:
+unicast_process	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/unicast/unicast_communication.c	/^AUTOSTART_PROCESSES(&unicast_process);$/;"	v	language:C++

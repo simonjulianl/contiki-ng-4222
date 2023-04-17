@@ -1,0 +1,56 @@
+!_TAG_FILE_SORTED	2	/0=unsorted, 1=sorted, 2=foldcase/
+Connected	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/receiver.c	/^    Connected$/;"	e	language:C++	enum:state	file:
+CONNECT_INTERVAL	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/receiver.c	22;"	d	language:C++	file:
+CONNECT_PERIOD	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/receiver.c	21;"	d	language:C++	file:
+CONTIKI	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/Makefile	/^CONTIKI = ..\/..$/;"	m	language:Make
+CONTIKI_PROJECT	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/Makefile	/^CONTIKI_PROJECT = transmitter receiver$/;"	m	language:Make
+current_state	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/receiver.c	/^enum state current_state = Detecting; $/;"	v	language:C++	typeref:enum:state
+curr_timestamp	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/nbr.c	/^unsigned long curr_timestamp;$/;"	v	language:C++
+curr_timestamp	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/receiver.c	/^unsigned long curr_timestamp;$/;"	v	language:C++
+curr_timestamp	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/transmitter.c	/^unsigned long curr_timestamp;$/;"	v	language:C++
+data_packet	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/nbr.c	/^static data_packet_struct data_packet;$/;"	v	language:C++	file:
+data_packet	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/receiver.c	/^static data_packet_struct data_packet;$/;"	v	language:C++	file:
+data_packet	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/transmitter.c	/^static data_packet_struct data_packet;$/;"	v	language:C++	file:
+data_packet_struct	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/nbr.c	/^} data_packet_struct;$/;"	t	language:C++	typeref:struct:__anon1	file:
+data_packet_struct	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/receiver.c	/^} data_packet_struct;$/;"	t	language:C++	typeref:struct:__anon1	file:
+data_packet_struct	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/transmitter.c	/^} data_packet_struct;$/;"	t	language:C++	typeref:struct:__anon1	file:
+DELAY_SLOT	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/nbr.c	17;"	d	language:C++	file:
+dest_addr	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/nbr.c	/^linkaddr_t dest_addr;$/;"	v	language:C++
+dest_addr	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/receiver.c	/^linkaddr_t dest_addr;$/;"	v	language:C++
+dest_addr	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/transmitter.c	/^linkaddr_t dest_addr;$/;"	v	language:C++
+Detecting	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/receiver.c	/^    Detecting, $/;"	e	language:C++	enum:state	file:
+detect_process	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/receiver.c	/^AUTOSTART_PROCESSES(&detect_process);$/;"	v	language:C++
+DISCONNECT_PERIOD	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/receiver.c	23;"	d	language:C++	file:
+EMPTY_ID	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/receiver.c	24;"	d	language:C++	file:
+et	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/receiver.c	/^static struct etimer et; $/;"	v	language:C++	typeref:struct:etimer	file:
+MAKE_NET	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/Makefile	/^MAKE_NET = MAKE_NET_NULLNET$/;"	m	language:Make
+nbr_discovery_process	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/nbr.c	/^AUTOSTART_PROCESSES(&nbr_discovery_process);$/;"	v	language:C++
+nbr_discovery_process	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/transmitter.c	/^AUTOSTART_PROCESSES(&nbr_discovery_process);$/;"	v	language:C++
+NUM_SEND	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/receiver.c	29;"	d	language:C++	file:
+PROCESS_THREAD	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/nbr.c	/^PROCESS_THREAD(nbr_discovery_process, ev, data)$/;"	f	language:C++
+PROCESS_THREAD	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/receiver.c	/^PROCESS_THREAD(detect_process, ev, data)$/;"	f	language:C++
+PROCESS_THREAD	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/receiver.c	/^PROCESS_THREAD(try_connecting_process, ev, data) $/;"	f	language:C++
+PROCESS_THREAD	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/transmitter.c	/^PROCESS_THREAD(nbr_discovery_process, ev, data)$/;"	f	language:C++
+pt	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/nbr.c	/^static struct pt pt;$/;"	v	language:C++	typeref:struct:pt	file:
+receive_packet_callback	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/nbr.c	/^void receive_packet_callback(const void *data, uint16_t len, const linkaddr_t *src, const linkaddr_t *dest) $/;"	f	language:C++
+receive_packet_callback	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/receiver.c	/^void receive_packet_callback(const void *data, uint16_t len, const linkaddr_t *src, const linkaddr_t *dest) $/;"	f	language:C++
+receive_packet_callback	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/transmitter.c	/^void receive_packet_callback(const void *data, uint16_t len, const linkaddr_t *src, const linkaddr_t *dest) $/;"	f	language:C++
+RSSI_THRESHOLD	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/receiver.c	20;"	d	language:C++	file:
+rt	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/nbr.c	/^static struct rtimer rt;$/;"	v	language:C++	typeref:struct:rtimer	file:
+sender_scheduler	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/nbr.c	/^char sender_scheduler(struct rtimer *t, void *ptr) {$/;"	f	language:C++
+seq	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/nbr.c	/^    unsigned long seq;$/;"	m	language:C++	struct:__anon1	file:
+seq	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/receiver.c	/^    unsigned long seq;$/;"	m	language:C++	struct:__anon1	file:
+seq	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/transmitter.c	/^    unsigned long seq;$/;"	m	language:C++	struct:__anon1	file:
+SLEEP_CYCLE	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/receiver.c	17;"	d	language:C++	file:
+SLEEP_SLOT	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/receiver.c	18;"	d	language:C++	file:
+src_id	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/nbr.c	/^    unsigned long src_id;$/;"	m	language:C++	struct:__anon1	file:
+src_id	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/receiver.c	/^    unsigned long src_id;$/;"	m	language:C++	struct:__anon1	file:
+src_id	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/transmitter.c	/^    unsigned long src_id;$/;"	m	language:C++	struct:__anon1	file:
+state	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/receiver.c	/^enum state {$/;"	g	language:C++	file:
+tc_etimer	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/receiver.c	/^static struct etimer tc_etimer; $/;"	v	language:C++	typeref:struct:etimer	file:
+timestamp	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/nbr.c	/^    unsigned long timestamp;$/;"	m	language:C++	struct:__anon1	file:
+timestamp	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/receiver.c	/^    unsigned long timestamp;$/;"	m	language:C++	struct:__anon1	file:
+timestamp	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/transmitter.c	/^    unsigned long timestamp;$/;"	m	language:C++	struct:__anon1	file:
+transmitter_id	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/receiver.c	/^long transmitter_id = EMPTY_ID; $/;"	v	language:C++
+TryConnecting	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/receiver.c	/^    TryConnecting, $/;"	e	language:C++	enum:state	file:
+WAKE_TIME	/home/lauwsj/Desktop/CS4222/contiki-ng/examples/nbr/receiver.c	16;"	d	language:C++	file:
