@@ -137,8 +137,8 @@ void receive_connecting_callback(const void *data, uint16_t len, const linkaddr_
 }
 
 void handle_connecting_packet(data_packet_struct *received_packet_data) {
-    static signed short current_rssi_value = 0;
     static int i = 0;
+    static signed short current_rssi_value = 0;
     current_rssi_value = (signed short) packetbuf_attr(PACKETBUF_ATTR_RSSI);
 
     uint8_t is_found = false;
@@ -205,10 +205,14 @@ void receive_light_callback(const void *data, uint16_t len, const linkaddr_t *sr
 PROCESS_THREAD(sending_light_process, ev, data) {
     PROCESS_BEGIN();
     NETSTACK_RADIO.on();
+
+    printf("Currently in sending light phase\n");
+
     nullnet_set_input_callback(receive_light_callback);
     static int j = 0;
 
     while (1) {
+        NETSTACK_RADIO.on();
         data_packet.type = CONNECTING_PACKET;
         curr_timestamp = clock_time();
         data_packet.timestamp = curr_timestamp;
@@ -228,7 +232,7 @@ PROCESS_THREAD(sending_light_process, ev, data) {
                 switch (node_information[j].stat) {
                     case CONNECTED:
                         if (curr_timestamp / CLOCK_SECOND - node_information[j].last_within_proximity_s >= DISCONNECT_PERIOD) {
-                            printf("%lu ABSENT %ld", node_information[j].last_within_proximity_s, node_information[j].src_id);
+                            printf("%lu ABSENT %ld\n", node_information[j].last_within_proximity_s, node_information[j].src_id);
                             node_information[j].src_id = EMPTY_ID;
                             node_information[j].stat = NOT_CONNECTED;
                         } else {
@@ -239,7 +243,7 @@ PROCESS_THREAD(sending_light_process, ev, data) {
                     case CONNECTING:
                         is_all_empty = false;
                         if (should_be_connected) {
-                            printf("%lu DETECT %ld", curr_timestamp / CLOCK_SECOND, node_information[j].first_detected);
+                            printf("%lu DETECT %ld\n", node_information[j].first_detected, node_information[j].src_id);
                             at_least_one_is_connected = true;
                             node_information[j].stat = CONNECTED;
                         } else {
@@ -260,15 +264,18 @@ PROCESS_THREAD(sending_light_process, ev, data) {
             NETSTACK_RADIO.off();
             process_start(&detect_process, NULL);
             process_exit(&sending_light_process);
+            goto quit;
         } else if (at_least_one_is_connecting) {
             // go back to try connecting process
             etimer_stop(&light_etimer);
             NETSTACK_RADIO.off();
             process_start(&try_connecting_process, NULL);
             process_exit(&sending_light_process);
+            goto quit;
         }
     }
 
+quit:;
     PROCESS_END();
 }
 
@@ -279,9 +286,12 @@ PROCESS_THREAD(try_connecting_process, ev, data) {
 
     nullnet_set_input_callback(receive_connecting_callback);
 
+    printf("Currently in try connecting phase\n");
+
     static int j;
 
     while(1) {
+        NETSTACK_RADIO.on(); // jic it get turned off anywhere else
         data_packet.type = CONNECTING_PACKET;
         data_packet.seq++;
         curr_timestamp = clock_time();
@@ -302,7 +312,7 @@ PROCESS_THREAD(try_connecting_process, ev, data) {
             if (node_information[j].src_id != EMPTY_ID) {
                 is_all_empty = false;
                 if (curr_timestamp / CLOCK_SECOND - node_information[j].first_detected >= CONNECT_PERIOD) {
-                    printf("%lu DETECT %ld", curr_timestamp / CLOCK_SECOND, node_information[j].first_detected);
+                    printf("%lu DETECT %ld\n", node_information[j].first_detected, node_information[j].src_id);
                     at_least_one_is_connected = true;
                     node_information[j].stat = CONNECTED;
                 }
@@ -315,14 +325,19 @@ PROCESS_THREAD(try_connecting_process, ev, data) {
             NETSTACK_RADIO.off();
             process_start(&detect_process, NULL);
             process_exit(&try_connecting_process);
+            goto quit;
         }
 
         if (at_least_one_is_connected) {
+            etimer_stop(&tc_etimer);
+
             process_start(&sending_light_process, NULL);
             process_exit(&try_connecting_process);
+            goto quit;
         }
     }
 
+quit:;
     PROCESS_END();
 }
 

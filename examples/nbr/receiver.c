@@ -56,7 +56,8 @@ void receive_disco_callback(const void *data, uint16_t len, const linkaddr_t *sr
         // Copy the content of packet into the data structure
         memcpy(&received_packet_data, data, len);
 
-        signed short rssi = (signed short) packetbuf_attr(PACKETBUF_ATTR_RSSI);
+        static signed short rssi = 0;
+        rssi = (signed short) packetbuf_attr(PACKETBUF_ATTR_RSSI);
         if (received_packet_data.role == LIGHT_SENSOR_PROVIDER && rssi >= RSSI_THRESHOLD) {
             // if it detects the id for the first time
             transmitter_id = (long) received_packet_data.src_id;
@@ -65,7 +66,7 @@ void receive_disco_callback(const void *data, uint16_t len, const linkaddr_t *sr
             process_exit(&detect_process);
 
             // Print the details of the received packet
-            printf("Received neighbour discovery packet %lu with rssi %d from %ld\n", received_packet_data.seq,
+            printf("Received connecting packet in disco phase %lu with rssi %d from %ld\n", received_packet_data.seq,
                    (signed short) packetbuf_attr(PACKETBUF_ATTR_RSSI), received_packet_data.src_id);
         } // do not allow provider to detect other provider / requester - requester
     }
@@ -84,6 +85,10 @@ void receive_connecting_callback(const void *data, uint16_t len, const linkaddr_
 
         static signed short current_rssi_value = 0;
         current_rssi_value = (signed short) packetbuf_attr(PACKETBUF_ATTR_RSSI);
+
+        printf("Received connecting packet in connecting phase %lu with rssi %d from %ld\n", received_packet_data.seq,
+               current_rssi_value, received_packet_data.src_id);
+
         if (current_rssi_value < RSSI_THRESHOLD) {
             etimer_stop(&tc_etimer);
 
@@ -104,6 +109,9 @@ void receive_light_callback(const void *data, uint16_t len, const linkaddr_t *sr
 
         // Copy the content of packet into the data structure
         memcpy(&received_packet_data, data, len);
+
+        printf("Received neighbour discovery packet %lu with rssi %d from %ld\n", received_packet_data.seq,
+               (signed short) packetbuf_attr(PACKETBUF_ATTR_RSSI), received_packet_data.src_id);
 
         if (received_packet_data.src_id != transmitter_id) {
             return; // ignore random packet
@@ -144,23 +152,28 @@ PROCESS_THREAD(requesting_light_process, ev, data) {
     printf("Requesting light sensor from id %ld\n", transmitter_id);
     nullnet_set_input_callback(receive_light_callback);
     static int l;
+
     while (1) {
+        NETSTACK_RADIO.on();
         curr_timestamp = clock_time();
         data_packet.timestamp = curr_timestamp;
         data_packet.seq++;
         data_packet.type = LIGHT_SENSOR_PACKET;
         NETSTACK_NETWORK.output(&dest_addr);
 
-        for (l = 0; l < SAMPLING_RATE / CONNECT_INTERVAL; l++) {
+        for (l = 0; l < (SAMPLING_RATE / CONNECT_INTERVAL); l++) {
             // before we send the next packet, check if we need to disconnect
             curr_timestamp = clock_time();
+            printf("Last within proximity: %lu\n", last_within_proximity_s);
             if ((curr_timestamp / CLOCK_SECOND) - last_within_proximity_s >= DISCONNECT_PERIOD) {
+                etimer_stop(&light_etimer);
                 curr_timestamp = clock_time();
-                printf("%lu ABSENT %ld", curr_timestamp / CLOCK_SECOND, transmitter_id);
+                printf("%lu ABSENT %ld\n", curr_timestamp / CLOCK_SECOND, transmitter_id);
                 goto quit;
             }
             etimer_set(&light_etimer, CLOCK_SECOND * CONNECT_INTERVAL);
             PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&light_etimer));
+            NETSTACK_RADIO.on();
             curr_timestamp = clock_time();
             data_packet.timestamp = curr_timestamp;
             data_packet.seq++;
@@ -170,11 +183,10 @@ PROCESS_THREAD(requesting_light_process, ev, data) {
     }
 
 quit:
-    etimer_stop(&light_etimer);
     process_start(&detect_process, NULL);
     transmitter_id = EMPTY_ID;
-    NETSTACK_RADIO.off();
     process_exit(&requesting_light_process);
+    NETSTACK_RADIO.off();
     PROCESS_END();
 }
 
@@ -188,6 +200,7 @@ PROCESS_THREAD(try_connecting_process, ev, data) {
     static int j;
 
     for (j = 0; j < CONNECT_PERIOD / CONNECT_INTERVAL; j++) {
+        NETSTACK_RADIO.on();
         data_packet.seq++;
         curr_timestamp = clock_time();
         data_packet.timestamp = curr_timestamp;
@@ -202,7 +215,7 @@ PROCESS_THREAD(try_connecting_process, ev, data) {
     }
 
     curr_timestamp = clock_time();
-    printf("%lu DETECT %ld", curr_timestamp / CLOCK_SECOND, transmitter_id);
+    printf("%lu DETECT %ld\n", curr_timestamp / CLOCK_SECOND, transmitter_id);
     process_start(&requesting_light_process, NULL);
     process_exit(&try_connecting_process);
     PROCESS_END();
@@ -218,14 +231,13 @@ PROCESS_THREAD(detect_process, ev, data) {
         data_packet.seq = 0; //Initialize the sequence number of the packet at the begin of disco
         data_packet.role = LIGHT_SENSOR_REQUESTER;
         linkaddr_copy(&dest_addr, &linkaddr_null);
-        printf("Light sensor provider\n");
+        printf("Light sensor requester\n");
         is_init = 0;
     }
 
     // initialize the node info neighbours
     nullnet_set_input_callback(receive_disco_callback); //initialize receiver callback
 
-    printf("Light sensor requester\n");
     printf("Node %d will be sending packet of size %d Bytes\n", node_id, (int) sizeof(data_packet_struct));
 
     // Get the current time stamp
