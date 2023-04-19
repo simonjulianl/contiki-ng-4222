@@ -174,6 +174,17 @@ void handle_connecting_packet(data_packet_struct *received_packet_data) {
             }
         }
     }
+
+    // send the packet back immediately telling the receiver that it is still in proximity
+    NETSTACK_RADIO.on();
+    data_packet.type = CONNECTING_PACKET; // the destination is not important as it is for everyone
+    curr_timestamp = clock_time();
+    data_packet.timestamp = curr_timestamp;
+    data_packet.seq++;
+    NETSTACK_NETWORK.output(&dest_addr);
+
+    printf("Send seq# %lu  @ %8lu ticks   %3lu.%03lu\n", data_packet.seq, curr_timestamp,
+           curr_timestamp / CLOCK_SECOND, ((curr_timestamp % CLOCK_SECOND) * 1000) / CLOCK_SECOND);
 }
 
 void receive_light_callback(const void *data, uint16_t len, const linkaddr_t *src, const linkaddr_t *dest) {
@@ -212,12 +223,6 @@ PROCESS_THREAD(sending_light_process, ev, data) {
     static int j = 0;
 
     while (1) {
-        NETSTACK_RADIO.on();
-        data_packet.type = CONNECTING_PACKET;
-        curr_timestamp = clock_time();
-        data_packet.timestamp = curr_timestamp;
-        data_packet.seq++;
-        NETSTACK_NETWORK.output(&dest_addr);
         etimer_set(&light_etimer, CLOCK_SECOND * CONNECT_INTERVAL);
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&light_etimer));
 
@@ -291,16 +296,6 @@ PROCESS_THREAD(try_connecting_process, ev, data) {
     static int j;
 
     while(1) {
-        NETSTACK_RADIO.on(); // jic it get turned off anywhere else
-        data_packet.type = CONNECTING_PACKET;
-        data_packet.seq++;
-        curr_timestamp = clock_time();
-        data_packet.timestamp = curr_timestamp;
-
-        printf("Send seq# %lu  @ %8lu ticks   %3lu.%03lu\n", data_packet.seq, curr_timestamp,
-               curr_timestamp / CLOCK_SECOND, ((curr_timestamp % CLOCK_SECOND) * 1000) / CLOCK_SECOND);
-        NETSTACK_NETWORK.output(&dest_addr); //Packet transmission
-
         etimer_set(&tc_etimer, CLOCK_SECOND * CONNECT_INTERVAL);
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&tc_etimer));
 
